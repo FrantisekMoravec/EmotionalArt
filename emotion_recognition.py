@@ -1,31 +1,58 @@
-# emotion_recognition.py
 import cv2
+import mediapipe as mp
 from deepface import DeepFace
+import numpy as np
 
-# Inicializace kamery
-cap = cv2.VideoCapture(0)
+def draw_landmarks(frame, landmarks):
+    for point in landmarks:
+        cv2.circle(frame, (int(point[0]), int(point[1])), 1, (0, 255, 0), -1)
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Failed to capture frame from camera. Exiting...")
-        break
+def detect_emotions(frame):
+    # Inicializace MediaPipe Face Mesh
+    mp_face_mesh = mp.solutions.face_mesh
+    mp_drawing = mp.solutions.drawing_utils
+    mp_drawing_styles = mp.solutions.drawing_styles
 
-    # Analýza emocí
-    try:
-        analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
-        emotions = analysis[0]['emotion']  # správný přístup k analýze emocí
-        print("Emotions detected:", emotions)
+    with mp_face_mesh.FaceMesh(
+        static_image_mode=False,
+        max_num_faces=1,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5) as face_mesh:
 
-        # Zobrazení výsledku
-        dominant_emotion = max(emotions, key=emotions.get)
-        cv2.putText(frame, dominant_emotion, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.imshow('Emotion Recognition', frame)
-    except Exception as e:
-        print("Error in emotion analysis:", e)
+        # Konverze snímku na RGB
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        # Detekce obličejů a landmarků
+        results = face_mesh.process(rgb_frame)
 
-cap.release()
-cv2.destroyAllWindows()
+        emotions = {}
+        if results.multi_face_landmarks:
+            for face_landmarks in results.multi_face_landmarks:
+                mp_drawing.draw_landmarks(
+                    image=frame,
+                    landmark_list=face_landmarks,
+                    connections=mp_face_mesh.FACEMESH_TESSELATION,
+                    landmark_drawing_spec=None,
+                    connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style())
+
+                # Získání bounding boxu obličeje
+                ih, iw, _ = frame.shape
+                bbox = [np.min(np.array([[lm.x * iw, lm.y * ih] for lm in face_landmarks.landmark]), axis=0).astype(int),
+                        np.max(np.array([[lm.x * iw, lm.y * ih] for lm in face_landmarks.landmark]), axis=0).astype(int)]
+                x, y = bbox[0]
+                w, h = bbox[1] - bbox[0]
+
+                face_region = frame[y:y + h, x:x + w]
+
+                # Analýza emocí pomocí
+                try:
+                    analysis = DeepFace.analyze(face_region, actions=['emotion'], enforce_detection=False)
+                    emotions = analysis[0]['emotion']
+                    dominant_emotion = max(emotions, key=emotions.get)
+
+                    # Vykreslení dominantní emoce
+                    cv2.putText(frame, dominant_emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2, cv2.LINE_AA)
+                except Exception as e:
+                    print("Error in emotion analysis:", e)
+
+        return frame, emotions
