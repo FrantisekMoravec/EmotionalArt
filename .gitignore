@@ -15,3 +15,28 @@ venv/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Data
+/runs
+
+# Pretrained model
+/pretrained_models
+
+# StyleGAN2-ADA original files
+/dnnlib
+/docs
+/metrics
+/torch_utils
+/training
+/__init__.py
+/calc_metrics.py
+/dataset_tool.py
+/docker_run.sh
+/Dockerfile
+/generate.py
+/legacy.py
+/LICENSE.txt
+/projector.py
+/README.md
+/style_mixing.py
+/train.py
