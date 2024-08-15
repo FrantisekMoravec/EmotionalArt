@@ -55,7 +55,7 @@ class MainApp(QtWidgets.QMainWindow):
             print("Error in emotion detection and analysis:", e)
 
     def generate_and_display_image(self):
-        model_path = '../pretrained_models/afhqcat.pkl'
+        model_path = 'pretrained_models/afhqcat.pkl'
         generated_image = initialize_and_generate_image(model_path)
 
         image_path = save_image(generated_image, self.run_directory, 'random_image.png')

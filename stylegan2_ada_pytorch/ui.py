@@ -11,42 +11,39 @@ class EmotionRecognitionUI(QtWidgets.QWidget):
         self.setWindowTitle('Emotion Recognition')
         self.setGeometry(100, 100, 1280, 720)
 
-        # Hlavní layout
+        # Main layout
         self.layout = QtWidgets.QVBoxLayout()
 
-        # Layout pro obrazy
+        # Image layout
         self.image_layout = QtWidgets.QHBoxLayout()
 
-        # Video feed label (kamera)
+        # Video feed label (camera)
         self.video_feed_label = QtWidgets.QLabel(self)
         self.video_feed_label.setFixedSize(640, 480)
         self.image_layout.addWidget(self.video_feed_label)
 
-        # Generated image label (vygenerovaný obrázek)
+        # Generated image label
         self.generated_image_label = QtWidgets.QLabel(self)
         self.generated_image_label.setFixedSize(512, 512)
         self.image_layout.addWidget(self.generated_image_label)
 
         self.layout.addLayout(self.image_layout)
 
-        # Layout pro tlačítka
+        # Button layout
         self.button_layout = QtWidgets.QHBoxLayout()
 
-        # Tlačítko pro zobrazení měření emocí
         self.show_log_button = QtWidgets.QPushButton('Show Emotion Log', self)
         self.button_layout.addWidget(self.show_log_button)
 
-        # Tlačítko pro zobrazení průměrovaných výsledků emocí
         self.show_avg_log_button = QtWidgets.QPushButton('Show Average Emotion Log', self)
         self.button_layout.addWidget(self.show_avg_log_button)
 
-        # Tlačítko pro generování náhodného obrázku
         self.generate_image_button = QtWidgets.QPushButton('Generate Random Image', self)
         self.button_layout.addWidget(self.generate_image_button)
 
         self.layout.addLayout(self.button_layout)
 
-        # Tabulka emocí
+        # Emotions table
         self.emotions_table = QtWidgets.QTableWidget(self)
         self.emotions_table.setRowCount(7)
         self.emotions_table.setColumnCount(2)
@@ -84,7 +81,7 @@ class EmotionLogWindow(QtWidgets.QWidget):
         # Layout
         self.layout = QtWidgets.QVBoxLayout()
 
-        # Tabulka s logy
+        # Log table
         self.log_table = QtWidgets.QTableWidget(self)
         self.log_table.setRowCount(len(log_data))
         self.log_table.setColumnCount(8)
