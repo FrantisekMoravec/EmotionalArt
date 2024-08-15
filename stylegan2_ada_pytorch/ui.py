@@ -5,36 +5,61 @@ import sys
 class EmotionRecognitionUI(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Emotion Recognition')
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 1280, 720)
 
-        # Layout
+        # Hlavní layout
         self.layout = QtWidgets.QVBoxLayout()
 
-        # Video feed label
+        # Layout pro obrazy
+        self.image_layout = QtWidgets.QHBoxLayout()
+
+        # Video feed label (kamera)
         self.video_feed_label = QtWidgets.QLabel(self)
         self.video_feed_label.setFixedSize(640, 480)
-        self.layout.addWidget(self.video_feed_label)
+        self.image_layout.addWidget(self.video_feed_label)
 
-        # Emotions table
-        self.emotions_table = QtWidgets.QTableWidget(self)
-        self.emotions_table.setRowCount(7)  # 7 základních emocí
-        self.emotions_table.setColumnCount(2)
-        self.emotions_table.setHorizontalHeaderLabels(['Emotion', 'Value'])
-        self.layout.addWidget(self.emotions_table)
+        # Generated image label (vygenerovaný obrázek)
+        self.generated_image_label = QtWidgets.QLabel(self)
+        self.generated_image_label.setFixedSize(512, 512)
+        self.image_layout.addWidget(self.generated_image_label)
+
+        self.layout.addLayout(self.image_layout)
+
+        # Layout pro tlačítka
+        self.button_layout = QtWidgets.QHBoxLayout()
 
         # Tlačítko pro zobrazení měření emocí
         self.show_log_button = QtWidgets.QPushButton('Show Emotion Log', self)
-        self.layout.addWidget(self.show_log_button)
+        self.button_layout.addWidget(self.show_log_button)
+
+        # Tlačítko pro zobrazení průměrovaných výsledků emocí
+        self.show_avg_log_button = QtWidgets.QPushButton('Show Average Emotion Log', self)
+        self.button_layout.addWidget(self.show_avg_log_button)
+
+        # Tlačítko pro generování náhodného obrázku
+        self.generate_image_button = QtWidgets.QPushButton('Generate Random Image', self)
+        self.button_layout.addWidget(self.generate_image_button)
+
+        self.layout.addLayout(self.button_layout)
+
+        # Tabulka emocí
+        self.emotions_table = QtWidgets.QTableWidget(self)
+        self.emotions_table.setRowCount(7)
+        self.emotions_table.setColumnCount(2)
+        self.emotions_table.setHorizontalHeaderLabels(['Emotion', 'Value'])
+        self.layout.addWidget(self.emotions_table)
 
         self.setLayout(self.layout)
 
     def update_frame(self, image):
         self.video_feed_label.setPixmap(QtGui.QPixmap.fromImage(image))
+
+    def update_generated_image(self, pixmap):
+        self.generated_image_label.setPixmap(pixmap)
 
     def update_emotions(self, emotions):
         for i, (emotion, value) in enumerate(emotions.items()):
@@ -44,6 +69,10 @@ class EmotionRecognitionUI(QtWidgets.QWidget):
     def show_emotion_log(self, log_data):
         self.log_window = EmotionLogWindow(log_data)
         self.log_window.show()
+
+    def show_avg_emotion_log(self, log_data):
+        self.avg_log_window = EmotionLogWindow(log_data)
+        self.avg_log_window.show()
 
 
 class EmotionLogWindow(QtWidgets.QWidget):
@@ -55,10 +84,10 @@ class EmotionLogWindow(QtWidgets.QWidget):
         # Layout
         self.layout = QtWidgets.QVBoxLayout()
 
-        # Log table
+        # Tabulka s logy
         self.log_table = QtWidgets.QTableWidget(self)
         self.log_table.setRowCount(len(log_data))
-        self.log_table.setColumnCount(8)  # 7 emocí + timestamp
+        self.log_table.setColumnCount(8)
         self.log_table.setHorizontalHeaderLabels(
             ['Timestamp', 'Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral'])
 

@@ -8,7 +8,7 @@ def draw_landmarks(frame, landmarks):
         cv2.circle(frame, (int(point[0]), int(point[1])), 1, (0, 255, 0), -1)
 
 def detect_emotions(frame):
-    # Inicializace MediaPipe Face Mesh
+    # Initialising MediaPipe Face Mesh
     mp_face_mesh = mp.solutions.face_mesh
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
@@ -19,10 +19,10 @@ def detect_emotions(frame):
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5) as face_mesh:
 
-        # Konverze snímku na RGB
+        # Converting image to RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Detekce obličejů a landmarků
+        # Face detection
         results = face_mesh.process(rgb_frame)
 
         emotions = {}
@@ -35,7 +35,7 @@ def detect_emotions(frame):
                     landmark_drawing_spec=None,
                     connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style())
 
-                # Získání bounding boxu obličeje
+                # Face bounding box
                 ih, iw, _ = frame.shape
                 bbox = [np.min(np.array([[lm.x * iw, lm.y * ih] for lm in face_landmarks.landmark]), axis=0).astype(int),
                         np.max(np.array([[lm.x * iw, lm.y * ih] for lm in face_landmarks.landmark]), axis=0).astype(int)]
@@ -44,13 +44,13 @@ def detect_emotions(frame):
 
                 face_region = frame[y:y + h, x:x + w]
 
-                # Analýza emocí pomocí
+                # Emotion analysis
                 try:
                     analysis = DeepFace.analyze(face_region, actions=['emotion'], enforce_detection=False)
                     emotions = analysis[0]['emotion']
                     dominant_emotion = max(emotions, key=emotions.get)
 
-                    # Vykreslení dominantní emoce
+                    # Drawing dominant emotion
                     cv2.putText(frame, dominant_emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2, cv2.LINE_AA)
                 except Exception as e:
                     print("Error in emotion analysis:", e)
